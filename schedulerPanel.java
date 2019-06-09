@@ -7,15 +7,19 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import java.sql.*;
 
 public class schedulerPanel extends JPanel {
 Reservation newReservation = new Reservation();
+//CHANGE THIS VARIABLE TO MAKE IT WORK for your mySQL server
+String password = "Student1234";
 JLabel arrivalLabel;
 JLabel departureLabel;
-JLabel fromtoLabel;
+//JLabel fromtoLabel;
 JPanel northernPanel;
 JPanel westernPanel;
 JPanel buttonsPanel;
@@ -44,12 +48,19 @@ JButton seatButton;
 JButton confirmButton;
 JComboBox arrivals;
 JComboBox departures;
-JComboBox destinations;
+Java2sAutoComboBox destinations;
+//optional
+Java2sAutoComboBox depart;
+JLabel des;
+JLabel arr;
 Connection myConn;
 String[] seatsSelected;
 String[] seatsReserved;
 int index = 0;
 int v = 0;
+//Felicia was here
+ArrayList<airports> ports = new ArrayList<airports>();
+List<String> dest = new ArrayList<String>();
 String confirmationNum;
 public schedulerPanel() {
 	setLayout(new BorderLayout());
@@ -60,7 +71,7 @@ public schedulerPanel() {
 	confirmButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root",password);
 				String query ="insert into reserved (passenger_name, destination, departureTime, arrivalTime, bkmealplan, lunchmealplan, dinnermealplan, confirmation, luggage) values(?,?,?,?,?,?,?,?,?)";
 				String query2 ="insert into confirmedseats (seats, confirmationNum) values(?,?)";
 				PreparedStatement pat=myConn.prepareStatement (query);
@@ -75,7 +86,7 @@ public schedulerPanel() {
 					pat2.execute();
 				newReservation.setPassenger(nameField.getText());
 				pat.setString(1, newReservation.getPassenger());
-				pat.setString(2, null);
+				pat.setString(2, newReservation.getDestination());
 				pat.setString(3, newReservation.getDepartureTime());
 				pat.setString(4, newReservation.getArrivalTime());
 				pat.setString(5, newReservation.getBkfastoption());
@@ -90,7 +101,7 @@ public schedulerPanel() {
 				pat.close();
 				
 				//confirmationNumber
-				
+				//SHOULD GIVE DISTANCES
 				
 			}catch(Exception e){
 				e.printStackTrace();
@@ -110,7 +121,9 @@ private Component getTextArea() {
 	nameLabel = new JLabel("Name: ");
 	departureLabel = new JLabel("Departure: ");
 	arrivalLabel = new JLabel("Arrival: ");
-	fromtoLabel = new JLabel("LAX -> NARNIA");
+	//fromtoLabel = new JLabel("LAX -> NARNIA");
+	arr = new JLabel("From: ");
+	des = new JLabel("To: ");
 	nameField = new JTextField(20);
 	luggageLabel = new JLabel("Luggage?: ");
 	luggageButton1 = new JRadioButton("Yes");
@@ -121,7 +134,7 @@ private Component getTextArea() {
 	String availableDestinations[] = null;
 	int i = 0;
 	try {
-	myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+	myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root",password);
 	
 	Statement myStat = myConn.createStatement();
 
@@ -147,14 +160,22 @@ private Component getTextArea() {
 	//arrivals.setSelectedIndex(i);
 	departures = new JComboBox(departureTimes);
 	//departures.setSelectedIndex(i);
-	//destinations = new JComboBox(availableDestinations);
+	DestinationList.dest();
+	ports = DestinationList.getAirportList();
+	dest = DestinationList.destList(ports);
+	
+	destinations = new Java2sAutoComboBox(dest);
+	depart = new Java2sAutoComboBox(dest);
+	//Below is testing.
+	//double dist = DestinationList.distance("LAX", "YVR", ports);
+	//System.out.println(dist);
 	//availableDestinations.setSelectedIndex(i);
 	arrivals.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
 				newReservation.setArrivalTime(arrivals.getSelectedItem().toString());
 				try {
-				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root",password);
 				
 				Statement myStat = myConn.createStatement();
 			
@@ -180,7 +201,7 @@ private Component getTextArea() {
 			try {
 				newReservation.setArrivalTime(destinations.getSelectedItem().toString());
 				try {
-				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root",password);
 				
 				Statement myStat = myConn.createStatement();
 			
@@ -227,8 +248,11 @@ private Component getTextArea() {
 	group.add(luggageButton2);
 	westernPanel.add(luggageButton1);
 	westernPanel.add(luggageButton2);
-	westernPanel.add(Box.createRigidArea(new Dimension(73, 0)));
-	westernPanel.add(fromtoLabel);
+	westernPanel.add(Box.createRigidArea(new Dimension(120, 0)));
+	westernPanel.add(arr);
+	westernPanel.add(depart);
+	westernPanel.add(des);
+	westernPanel.add(destinations);
 	westernPanel.add(Box.createRigidArea(new Dimension(800, 0)));
 	westernPanel.add(departureLabel);
 	westernPanel.add(departures);
@@ -531,7 +555,7 @@ private Component getButtonArea() {
 	char seatLetter = 'A';
 	
 	try {
-	Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+	Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root",password);
 	
 	Statement myStat = myConn.createStatement();
 

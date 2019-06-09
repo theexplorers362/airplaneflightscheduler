@@ -4,6 +4,7 @@ public class Reservation {
 	private String passenger;
 	private boolean luggage;
 	private String bkfastoption;
+	private String destination;
 	private String lunchoption;
 	private String dinneroption;
 	private String confirmationNum;
@@ -74,5 +75,13 @@ public class Reservation {
 
 	public void setPassenger(String passenger) {
 		this.passenger = passenger;
+	}
+
+	public String getDestination() {
+		return destination;
+	}
+
+	public void setDestination(String destination) {
+		this.destination = destination;
 	}
 }

@@ -36,6 +36,7 @@ public class Scheduler {
 				try {
 					Scheduler window = new Scheduler();
 					window.frame.setVisible(true);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

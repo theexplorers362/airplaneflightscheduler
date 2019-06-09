@@ -1,4 +1,3 @@
-CREATE SCHEMA booked_flights;
 CREATE TABLE airplane(
 airplanes VARCHAR(33) DEFAULT NULL,
 goTime TIME DEFAULT NULL,
