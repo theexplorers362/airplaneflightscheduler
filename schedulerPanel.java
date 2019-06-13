@@ -1,7 +1,5 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -47,9 +45,18 @@ JComboBox departures;
 JComboBox destinations;
 Connection myConn;
 String[] seatsSelected;
+String[] fcseatsReserved;
+String[] cseatsReserved;
 String[] seatsReserved;
 int index = 0;
 int v = 0;
+int k,j = 0;
+int h,z = 0;
+int i,f = 0;
+int fcnumReserved = 0;
+int cnumReserved = 0;
+int numReserved = 0;
+int totalReserved = 0;
 String confirmationNum;
 public schedulerPanel() {
 	setLayout(new BorderLayout());
@@ -65,17 +72,17 @@ public schedulerPanel() {
 				String query2 ="insert into confirmedseats (seats, confirmationNum) values(?,?)";
 				PreparedStatement pat=myConn.prepareStatement (query);
 				PreparedStatement pat2=myConn.prepareStatement (query2);
-				for(int i = 0; i <= v; i++) {
-					pat2.setString(1, seatsReserved[v]);
-					if(i % v == 0)
-					confirmationNum = "9876543"+ v;
+				for(int i = 0; i <= fcnumReserved; i++) {
+					System.out.println(fcnumReserved);
+					pat2.setString(1, fcseatsReserved[fcnumReserved]);
+					confirmationNum = "9876543"+ i;
 					pat2.setString(2, confirmationNum);
 					newReservation.setConfirmationNum(confirmationNum);
 					}
 					pat2.execute();
 				newReservation.setPassenger(nameField.getText());
 				pat.setString(1, newReservation.getPassenger());
-				pat.setString(2, null);
+				pat.setString(2, newReservation.getDestination());
 				pat.setString(3, newReservation.getDepartureTime());
 				pat.setString(4, newReservation.getArrivalTime());
 				pat.setString(5, newReservation.getBkfastoption());
@@ -110,7 +117,7 @@ private Component getTextArea() {
 	nameLabel = new JLabel("Name: ");
 	departureLabel = new JLabel("Departure: ");
 	arrivalLabel = new JLabel("Arrival: ");
-	fromtoLabel = new JLabel("LAX -> NARNIA");
+	fromtoLabel = new JLabel("LAX -> ");
 	nameField = new JTextField(20);
 	luggageLabel = new JLabel("Luggage?: ");
 	luggageButton1 = new JRadioButton("Yes");
@@ -119,7 +126,16 @@ private Component getTextArea() {
 	Time arriveTimes[] = null;
 	Time departureTimes[] = null;
 	String availableDestinations[] = null;
-	int i = 0;
+	//destinations = new JComboBox();
+	//destinations.setPreferredSize(new Dimension(50,25));
+	//destinations.setSelectedIndex(i);
+	//arrivals = new JComboBox();
+	//arrivals.setPreferredSize(new Dimension(50,25));
+	//arrivals.setSelectedIndex(i);
+	//departures = new JComboBox();
+	//departures.setPreferredSize(new Dimension(50,25));
+	//departures.setSelectedIndex(i);
+	int o = 0;
 	try {
 	myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 	
@@ -128,31 +144,48 @@ private Component getTextArea() {
 	ResultSet myRs = myStat.executeQuery("select * from airplane");
 	
 	while(myRs.next()) {
-		++i;
+		++o;
 	}
-	arriveTimes = new Time[i];
-	departureTimes = new Time[i];
+	arriveTimes = new Time[o];
+	departureTimes = new Time[o];
+	availableDestinations = new String[o];
 	while(myRs.next()) {
-		arriveTimes[i] = myRs.getTime("goTime");
-		departureTimes[i] = myRs.getTime("byeTime");
-		availableDestinations[i] = myRs.getString("destination");
-
-		++i;
+		arriveTimes[o] = myRs.getTime("goTime");
+		System.out.println(myRs.getTime("goTime"));
+		departureTimes[o] = myRs.getTime("helloTime");
+		availableDestinations[o] = myRs.getString("destination");
+		++o;
+		//destinations.setPreferredSize(new Dimension(50,25));
+		System.out.println(myRs.getString("destination"));
 	}
-	
+	destinations = new JComboBox(availableDestinations);
+	arrivals = new JComboBox(arriveTimes);
+	departures = new JComboBox(departureTimes);
 	}catch(Exception exc) {
 	exc.printStackTrace();
 	}
-	arrivals = new JComboBox(arriveTimes);
-	//arrivals.setSelectedIndex(i);
-	departures = new JComboBox(departureTimes);
-	//departures.setSelectedIndex(i);
-	//destinations = new JComboBox(availableDestinations);
-	//availableDestinations.setSelectedIndex(i);
-	arrivals.addActionListener(new ActionListener() {
+	westernPanel.add(Box.createRigidArea(new Dimension(25, 0)));
+	westernPanel.add(nameLabel);
+	westernPanel.add(nameField);
+	westernPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+	westernPanel.add(luggageLabel);
+	ButtonGroup group = new ButtonGroup();
+	group.add(luggageButton1);
+	group.add(luggageButton2);
+	westernPanel.add(luggageButton1);
+	westernPanel.add(luggageButton2);
+	westernPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+	westernPanel.add(fromtoLabel);
+	westernPanel.add(destinations);
+	westernPanel.add(Box.createRigidArea(new Dimension(800, 0)));
+	westernPanel.add(departureLabel);
+	westernPanel.add(departures);
+	westernPanel.add(arrivalLabel);
+	westernPanel.add(arrivals);
+	destinations.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				newReservation.setArrivalTime(arrivals.getSelectedItem().toString());
+				newReservation.setArrivalTime(destinations.getSelectedItem().toString());
 				try {
 				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 				
@@ -161,7 +194,7 @@ private Component getTextArea() {
 				ResultSet myRs = myStat.executeQuery("select * from airplane");
 				
 				while(myRs.next()) {
-					newReservation.setArrivalTime(myRs.getString("byeTime"));
+					newReservation.setArrivalTime(myRs.getString("destination"));
 				}
 			}catch(Exception exc) {
 				exc.printStackTrace();
@@ -175,10 +208,11 @@ private Component getTextArea() {
 			
 		}
 	});
-	/*destinations.addActionListener(new ActionListener() {
+	
+	arrivals.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				newReservation.setArrivalTime(destinations.getSelectedItem().toString());
+				newReservation.setArrivalTime(arrivals.getSelectedItem().toString());
 				try {
 				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 				
@@ -187,7 +221,7 @@ private Component getTextArea() {
 				ResultSet myRs = myStat.executeQuery("select * from airplane");
 				
 				while(myRs.next()) {
-					newReservation.setArrivalTime(myRs.getString("byeTime"));
+					newReservation.setArrivalTime(myRs.getString("HelloTime"));
 				}
 			}catch(Exception exc) {
 				exc.printStackTrace();
@@ -200,15 +234,24 @@ private Component getTextArea() {
 			}
 			
 		}
-	});*/
-	/*departures = new JComboBox(departureTimes);
-	departures.setSelectedIndex(i);
+	});
 	departures.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-			
-				newReservation.setLuggage(true);
+				newReservation.setArrivalTime(departures.getSelectedItem().toString());
+				try {
+				myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 				
+				Statement myStat = myConn.createStatement();
+			
+				ResultSet myRs = myStat.executeQuery("select * from airplane");
+				
+				while(myRs.next()) {
+					newReservation.setArrivalTime(myRs.getString("goTime"));
+				}
+			}catch(Exception exc) {
+				exc.printStackTrace();
+			}
 				//JOptionPane.showMessageDialog(null, "Data Saved");
 				
 				
@@ -217,23 +260,7 @@ private Component getTextArea() {
 			}
 			
 		}
-	});*/
-	westernPanel.add(Box.createRigidArea(new Dimension(30, 0)));
-	westernPanel.add(nameLabel);
-	westernPanel.add(nameField);
-	westernPanel.add(luggageLabel);
-	ButtonGroup group = new ButtonGroup();
-	group.add(luggageButton1);
-	group.add(luggageButton2);
-	westernPanel.add(luggageButton1);
-	westernPanel.add(luggageButton2);
-	westernPanel.add(Box.createRigidArea(new Dimension(73, 0)));
-	westernPanel.add(fromtoLabel);
-	westernPanel.add(Box.createRigidArea(new Dimension(800, 0)));
-	westernPanel.add(departureLabel);
-	westernPanel.add(departures);
-	westernPanel.add(arrivalLabel);
-	westernPanel.add(arrivals);
+	});
 	westernPanel.add(confirmButton);
 	luggageButton1.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
@@ -520,16 +547,18 @@ private Component getButtonArea() {
 	int numOfRows = 22;
 	int numOfColumns = 6;
 	int planeSize = 186;
+	fcseatsReserved = new String[planeSize];
+	cseatsReserved = new String[planeSize];
+	seatsReserved = new String[planeSize];
 	seatsSelected = new String[planeSize];
 	int x = 0;
 	int y = 0;
 	int buttonWidth = bounds.width / numOfRows;
 	int buttonHeight = bounds.height / numOfColumns;
-	int k = 0;
-	int h = 0;
-	int i = 0;
 	char seatLetter = 'A';
-	
+	JToggleButton[][] fcbuttons = new JToggleButton[fcnumOfRows][fcnumOfColumns];
+	JToggleButton[][] cbuttons = new JToggleButton[cnumOfRows][cnumOfColumns];
+	JToggleButton[][] buttons = new JToggleButton[numOfRows][numOfColumns];
 	try {
 	Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 	
@@ -546,34 +575,49 @@ private Component getButtonArea() {
 	}
 	for(k = 0; k < fcnumOfRows; k++) {
 		
-		for(int j = 0; j < fcnumOfColumns; j++) {
+		for(j = 0; j < fcnumOfColumns; j++) {
+			fcbuttons[k][j] = new JToggleButton(seatLetter + String.valueOf(v));
+			if(fcbuttons[k][j].getText() == seatsSelected[v])
+				fcbuttons[k][j].setBackground(new Color(0,0,0));
+			fcbuttons[k][j].setBackground(new Color(128,0,128));
 			
-			seatButton = new JButton(seatLetter + String.valueOf(k));
-			if(seatLetter + String.valueOf(k) == seatsSelected[v]);
-			seatButton.setBackground(new Color(192,192,192));
-			
-			seatButton.setBackground(new Color(128,0,128));
-			
-			if(j % 4 == 0) { 
+			if(v % 4 == 0) { 
 				seatLetter++;
 			}
-			seatButton.setFont(new Font("Arial", Font.PLAIN, 5));
-			seatButton.setPreferredSize(new Dimension (12,7));
+			fcbuttons[k][j].setFont(new Font("Arial", Font.PLAIN, 5));
+			fcbuttons[k][j].setPreferredSize(new Dimension (12,7));
 			if(j % 2 == 0) {
 			easternPanel.add(Box.createRigidArea(new Dimension(3, 0)));
 			}
 			if(j % 4 == 0) {
 			easternPanel.add(Box.createRigidArea(new Dimension(315, 0)));
 			}
-			seatButton.setBounds(x ,y,buttonWidth, buttonHeight);
-			easternPanel.add(seatButton, BorderLayout.EAST);
-			seatButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
+			fcbuttons[k][j].setBounds(x ,y,buttonWidth, buttonHeight);
+			easternPanel.add(fcbuttons[k][j], BorderLayout.EAST);
+			fcbuttons[k][j].addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
 					try {
-						seatsReserved[v] = seatButton.getText();
+						for(k = 0; k < fcnumOfRows; k++) {
+							
+							for(j = 0; j < fcnumOfColumns; j++) {
+							if(arg0.getStateChange() == ItemEvent.SELECTED && arg0.getSource() == fcbuttons[k][j].getText()) {
+							System.out.println(fcbuttons[k][j].getText());
+							fcseatsReserved[fcnumReserved] = fcbuttons[k][j].getText();
+							fcnumReserved++;
+							totalReserved++;
+							fcbuttons[k][j].setBackground(new Color(192,192,192));
+							}
+							else if(arg0.getStateChange() == ItemEvent.DESELECTED && arg0.getSource() == fcbuttons[k][j].getText()) {
+								fcnumReserved--;
+								totalReserved--;
+								fcseatsReserved[fcnumReserved] = "";
+								buttons[i][f].setBackground(new Color(205,127,50));
+							}
+							
 						//JOptionPane.showMessageDialog(null, "Data Saved");
 						
-						
+						}
+						}
 					}catch(Exception e){
 						e.printStackTrace();
 					}
@@ -581,95 +625,134 @@ private Component getButtonArea() {
 				
 			});
 			y += buttonHeight;
+			v++;
 		}
 		x += buttonWidth;
-		v++;
 	}
 	if(k == fcnumOfRows) {
-		easternPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		easternPanel.add(Box.createRigidArea(new Dimension(0,0)));
 		}
+	seatLetter = 'A';
 	for(h = 0; h < cnumOfRows; h++) {
 		
-		for(int z = 0; z < cnumOfColumns; z++) {
-			seatButton = new JButton(seatLetter + String.valueOf(z));
-			if(seatLetter + String.valueOf(z) == seatsSelected[v]);
-			seatButton.setBackground(new Color(192,192,192));
+		for(z = 0; z < cnumOfColumns; z++) {
+			cbuttons[h][z] = new JToggleButton(seatLetter + String.valueOf(v));
 			
-			seatButton.setBackground(new Color(255,215,0));
-			if(z % 6 == 0) { 
+			if(cbuttons[h][z].getText() == seatsSelected[v])
+				cbuttons[h][z].setBackground(new Color(0,0,0));
+			cbuttons[h][z].setBackground(new Color(255,215,0));
+			if(v % 6 == 0) { 
 				seatLetter++;
+				//System.out.println(seatLetter);
 			}
-			seatButton.setFont(new Font("Arial", Font.PLAIN, 5));
-			seatButton.setPreferredSize(new Dimension(11,10));
+			cbuttons[h][z].setFont(new Font("Arial", Font.PLAIN, 5));
+			cbuttons[h][z].setPreferredSize(new Dimension(11,10));
 		    if(z % 3 == 0) {
 			easternPanel.add(Box.createRigidArea(new Dimension(3, 0)));
 			}
 			if(z % 6 == 0) {
 			easternPanel.add(Box.createRigidArea(new Dimension(315, 0)));
 			}
-			seatButton.setBounds(x ,y,buttonWidth, buttonHeight);
-			easternPanel.add(seatButton, BorderLayout.EAST);
-			seatButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
+			cbuttons[h][z].setBounds(x ,y,buttonWidth, buttonHeight);
+			easternPanel.add(cbuttons[h][z], BorderLayout.EAST);
+			cbuttons[h][z].addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
 					try {
-						seatsReserved[v] = seatButton.getText();
+						for(h = 0; h < cnumOfRows; h++) {
+							
+							for(z = 0; z < cnumOfColumns; z++) {
+								
+							if(arg0.getStateChange() == ItemEvent.SELECTED && arg0.getSource() == cbuttons[h][z].getText()) {
+							//System.out.println(fcbuttons[h][z].getText());
+							cseatsReserved[cnumReserved] = cbuttons[h][z].getText();
+							cnumReserved++;
+							totalReserved++;
+							cbuttons[h][z].setBackground(new Color(192,192,192));
+							}
+							if(arg0.getStateChange() == ItemEvent.DESELECTED && arg0.getSource() == cbuttons[h][z].getText()) {
+								cnumReserved--;
+								totalReserved--;
+								cseatsReserved[cnumReserved] = "";
+								buttons[i][f].setBackground(new Color(205,127,50));
+							}
+
 						//JOptionPane.showMessageDialog(null, "Data Saved");
 						
-						
+						}
+						}
 					}catch(Exception e){
 						e.printStackTrace();
 					}
-					
-				}
 				
+				}
+
 			});
 			y += buttonHeight;
+			v++;
 		}
 		x += buttonWidth;
-		v++;
 	}
 	if(h == cnumOfRows) {
-		easternPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		easternPanel.add(Box.createRigidArea(new Dimension(0, 0)));
 	}
+	seatLetter = 'A';
 	for(i = 0; i < numOfRows; i++) {
 		
-		for(int f = 0; f < numOfColumns; f++) {
-			seatButton = new JButton(seatLetter + String.valueOf(i));
-			if(seatLetter + String.valueOf(k) == seatsSelected[i]);
-			seatButton.setBackground(new Color(192,192,192));
-			
-			seatButton.setBackground(new Color(205,127,50));
-			if(f % 6 == 0) { 
+		for(f = 0; f < numOfColumns; f++) {
+			buttons[i][f] = new JToggleButton(seatLetter + String.valueOf(v));
+
+			if(buttons[i][f].getText() == seatsSelected[v])
+				buttons[i][f].setBackground(new Color(0,0,0));
+			buttons[i][f].setBackground(new Color(205,127,50));
+			if(v % 6 == 0) { 
 			seatLetter++;
+			//System.out.println(seatLetter);
 			}
-			seatButton.setFont(new Font("Arial", Font.PLAIN, 5));
-			seatButton.setPreferredSize(new Dimension(10,10));
+			buttons[i][f].setFont(new Font("Arial", Font.PLAIN, 5));
+			buttons[i][f].setPreferredSize(new Dimension(10,10));
 			if(f % 3 == 0) {
 				easternPanel.add(Box.createRigidArea(new Dimension(7, 0)));
 				}
 			if(f % 6 == 0) {
 				easternPanel.add(Box.createRigidArea(new Dimension(315, 0)));
 			}
-			seatButton.setBounds(x ,y,buttonWidth, buttonHeight);
-			easternPanel.add(seatButton, BorderLayout.EAST);
-			seatButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
+			buttons[i][f].setBounds(x ,y,buttonWidth, buttonHeight);
+			easternPanel.add(buttons[i][f], BorderLayout.EAST);
+			buttons[i][f].addItemListener(new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
 					try {
-						seatsReserved[v] = seatButton.getText();
+						for(i = 0; i < numOfRows; i++) {
+							
+							for(f = 0; f < numOfColumns; f++) {
+							if(arg0.getStateChange() == ItemEvent.SELECTED && arg0.getSource() == buttons[i][f].getText()) {
+							seatsReserved[numReserved] = buttons[i][f].getText();
+							System.out.println(buttons[i][f].getText());
+							numReserved++;
+							totalReserved++;
+							buttons[i][f].setBackground(new Color(192,192,192));
+							}
+							else if(arg0.getStateChange() == ItemEvent.DESELECTED && arg0.getSource() == buttons[i][f].getText()) {
+								numReserved--;
+								totalReserved--;
+								seatsReserved[numReserved] = "";
+								buttons[i][f].setBackground(new Color(205,127,50));
+							}
+							
+							
 						//JOptionPane.showMessageDialog(null, "Data Saved");
 						
-						
+						}
+						}
 					}catch(Exception e){
 						e.printStackTrace();
 					}
-					
 				}
 				
 			});
 			y += buttonHeight;
+			v++;
 		}
 		x += buttonWidth;
-		v++;
 	}
 	if(i == numOfRows) {
 		easternPanel.add(Box.createRigidArea(new Dimension(6, 0)));
