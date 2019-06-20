@@ -53,7 +53,7 @@ public class Scheduler {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+ 	private void initialize() {
 		frame = new JFrame();
 		frame.setTitle("Airplane Flight Scheduler");
 		frame.setBounds(100, 100, 1000, 700);
