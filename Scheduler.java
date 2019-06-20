@@ -18,19 +18,6 @@ public class Scheduler {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		/*try {
-			Connection myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
-			
-			Statement myStat = myConn.createStatement();
-		
-			ResultSet myRs = myStat.executeQuery("select * from reserved");
-			
-			while(myRs.next()) {
-				System.out.println(myRs.getString("passenger_name"));
-			}
-		}catch(Exception exc) {
-			exc.printStackTrace();
-		}*/
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
