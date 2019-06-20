@@ -31,14 +31,16 @@ public class easternPanels {
 		numOfRows = 22;
 		numOfColumns = 6;
 		planeSize = 186;
+		numPlans = 0;
+		confirmationNum = ""; 
 		newReservation = new Reservation();
-		fcnumReserved = 0;
-		cnumReserved = 0;
-		numReserved = 0;
-		fcseatsReserved = null;
-		cseatsReserved = null;
-		seatsReserved = null;
-		
+		bkmealsSelected = new String[planeSize];
+		lunchmealsSelected = new String[planeSize];
+		dinnermealsSelected = new String[planeSize];
+		fcseatsReserved = new String[fcnumSeats];
+		cseatsReserved = new String[cnumSeats];
+		seatsReserved = new String[numSeats];
+		seatsSelected = new String[planeSize];
 		}
 	JPanel easternPanel;
 	int k,j;
@@ -59,6 +61,9 @@ public class easternPanels {
 	int totalReserved;
 	String[] seatsSelected;
 	
+	String[] bkmealsSelected;
+	String[] lunchmealsSelected;
+	String[] dinnermealsSelected;
 	Reservation newReservation;
 	JButton seatButton;
 	
@@ -70,12 +75,19 @@ public class easternPanels {
 	int numOfColumns;
 	int planeSize;
 	
+	String confirmationNum;
 	JToggleButton[][] fcbuttons;
 	JToggleButton[][] cbuttons;
 	JToggleButton[][] buttons;
+	JRadioButton a;
+	JRadioButton b;
+	JRadioButton c;
 	
-
-
+	ButtonGroup a_;
+	ButtonGroup b_;
+	ButtonGroup c_;
+	seat[] passengerPlan;
+	int numPlans;
 	/*Makes the state of the toggle button enabled if pressed for the returned seat numbers in an array with the size
 	 * toggles between color for premium seat color and grey to signify the need to be confirmed for reservation
 	 * 
@@ -83,41 +95,106 @@ public class easternPanels {
 	 * 
 	 * 
 	 */
+	public void addActionListenerHelperbkButtons(JRadioButton any, ButtonGroup group) {
+		a_ = group;
+	any.addActionListener(new ActionListener() { 
+		public void actionPerformed(ActionEvent arg0) {
+			try {
+				boolean  open = false;
+				if(open == false) {
+				a = (JRadioButton) arg0.getSource();
+			
+				bkmealsSelected[numPlans] = a.getText();
+				//a.setBackground(new Color(54,81,94));
+				open = true;
+				}
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+		}
+	});
+	}
+
+	public void addActionListenerHelperLunchButtons(JRadioButton any, ButtonGroup group) {
+		b_ = group;
+		any.addActionListener(new ActionListener() { 
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					boolean  open = false;
+					if(open == false) {
+					b = (JRadioButton) arg0.getSource();
+					
+					lunchmealsSelected[numPlans] = b.getText();
+					//b.setBackground(new Color(54,81,94));
+					open = true;
+					}
+					
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				
+			}
+	});
+	}
+	
+	public void addActionListenerHelperDinnerButtons(JRadioButton any, ButtonGroup group) {
+		c_ = group;
+		any.addActionListener(new ActionListener() { 
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					boolean  open = false;
+					if(open == false) {
+					c = (JRadioButton) arg0.getSource();
+					
+					dinnermealsSelected[numPlans] = c.getText();
+					
+					//c.setBackground(new Color(54,81,94));
+					open = true;
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				
+			}
+	});
+	}
 	public void stateofButtons() {
-		
 		for(k = 0; k < fcnumOfRows; k++) {
 			for(j = 0; j < fcnumOfColumns; j++) {
 				
 		fcbuttons[k][j].addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
-				try {
+				
 						JToggleButton tb = (JToggleButton) arg0.getItem();
 						if(arg0.getStateChange() == ItemEvent.SELECTED) {
-						
 						fcseatsReserved[fcnumReserved] = tb.getText();
-						System.out.println(tb.getText());
-						fcnumReserved+=1;
-						System.out.println(fcnumReserved);
-						//System.out.println(fcnumReserved);
+						numPlans++;
+						fcnumReserved++;
 						totalReserved++;
+						/*a.setBackground(null); 
+						b.setBackground(null);
+						c.setBackground(null);*/
+						a_.clearSelection();
+						b_.clearSelection();
+						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
 						//JOptionPane.showMessageDialog(null, "Data Saved");*/
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
+							numPlans--;
 							fcnumReserved--;
 							totalReserved--;
 							fcseatsReserved[fcnumReserved] = "";
+							bkmealsSelected[numPlans] = "";
+							lunchmealsSelected[numPlans] = "";
+							dinnermealsSelected[numPlans] = "";
 							tb.setBackground(new Color(128,0,128));
 						}
 						
 					
 					//JOptionPane.showMessageDialog(null, "Data Saved");
-						
-					
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-					
 			}
 			
 		});
@@ -132,17 +209,28 @@ public class easternPanels {
 				try {
 						JToggleButton tb = (JToggleButton) arg0.getItem();
 						if(arg0.getStateChange() == ItemEvent.SELECTED) {
-						System.out.println(tb.getText());
+						//System.out.println(tb.getText());
 						cseatsReserved[cnumReserved] = tb.getText();
+						numPlans++;
 						cnumReserved++;
 						totalReserved++;
+						/*a.setBackground(null); 
+						b.setBackground(null);
+						c.setBackground(null);*/
+						a_.clearSelection();
+						b_.clearSelection();
+						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
 						//JOptionPane.showMessageDialog(null, "Data Saved");
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
+							numPlans--;
 							cnumReserved--;
 							totalReserved--;
 							cseatsReserved[cnumReserved] = "";
+							bkmealsSelected[numPlans] = "";
+							lunchmealsSelected[numPlans] = "";
+							dinnermealsSelected[numPlans] = "";
 							tb.setBackground(new Color(255,215,0));
 						}
 
@@ -169,17 +257,27 @@ public class easternPanels {
 					
 						if(arg0.getStateChange() == ItemEvent.SELECTED) {
 						seatsReserved[numReserved] = tb.getText();
-						System.out.println(tb.getText());
+						//System.out.println(tb.getText());
+						numPlans++;
 						numReserved++;
-						System.out.println(numReserved);
 						totalReserved++;
+						a.setBackground(null); 
+						b.setBackground(null);
+						c.setBackground(null);
+						a_.clearSelection();
+						b_.clearSelection();
+						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
 						//JOptionPane.showMessageDialog(null, "Data Saved");
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
+							numPlans--;
 							numReserved--;
 							totalReserved--;
 							seatsReserved[numReserved] = "";
+							bkmealsSelected[numPlans] = "";
+							lunchmealsSelected[numPlans] = "";
+							dinnermealsSelected[numPlans] = "";
 							tb.setBackground(new Color(205,127,50));
 						}
 						
@@ -194,9 +292,75 @@ public class easternPanels {
 			
 		});
 		}
-		}
+		} 
 	}
 	
+	public void pressConfirm(JButton any) {
+		any.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			try {
+				int  gener = 0;
+				String query2 ="insert into confirmedseats (seats, bkmealplan, lunchmealplan, dinnermealplan, confirmationNum) values(?,?,?,?,?)";
+				PreparedStatement pat2=newReservation.myConn.prepareStatement (query2);
+				for(int seatIter = 0; seatIter < fcnumReserved; seatIter++) {
+					pat2.setString(1, fcseatsReserved[seatIter]);
+					pat2.setString(2, bkmealsSelected[seatIter]);
+					pat2.setString(3, lunchmealsSelected[seatIter]);
+					pat2.setString(4, dinnermealsSelected[seatIter]);
+					
+					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
+					pat2.setString(5, confirmationNum);
+					pat2.execute();
+				} 
+				for(int seatIter = 0; seatIter < cnumReserved; seatIter++) {
+					pat2.setString(1, cseatsReserved[seatIter]);
+					pat2.setString(2, bkmealsSelected[seatIter]);
+					pat2.setString(3, lunchmealsSelected[seatIter]);
+					pat2.setString(4, dinnermealsSelected[seatIter]);
+					
+					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
+					pat2.setString(5, confirmationNum);
+					pat2.execute();
+				}
+				for(int seatIter = 0; seatIter < numReserved; seatIter++) {
+					pat2.setString(1, seatsReserved[seatIter]);
+					pat2.setString(2, bkmealsSelected[seatIter]);
+					pat2.setString(3, lunchmealsSelected[seatIter]);
+					pat2.setString(4, dinnermealsSelected[seatIter]);
+					
+					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
+					pat2.setString(5, confirmationNum);
+					pat2.execute();
+				}
+				
+				
+				//JOptionPane.showMessageDialog(null, "Data Saved");
+				
+				pat2.close();
+				
+				//confirmationNumber
+				
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+		}
+	});
+	}
+	
+	public void seeiftaken(JToggleButton tglb) {
+		int q = 0;
+		while(q < index) {
+			System.out.println("\"" + tglb.getText()+ "\"");
+		if(tglb.getText() == seatsSelected[q]) {
+			System.out.println("\"" + seatsSelected[q] + "\"");
+			tglb.setBackground(new Color(0,0,0));
+		}
+		
+		q++;
+		}
+	}
 	/*Boundary Component of class easternPanels
 	 *When reopened the mySQL JBMS will color in the selectedSeating from previous requests blacked out and non-responsive.
 	 * 
@@ -208,10 +372,6 @@ public class easternPanels {
 	public Component getButtonArea() {
 		easternPanel = new JPanel();
 		Rectangle bounds = easternPanel.getBounds();
-		fcseatsReserved = new String[fcnumSeats];
-		cseatsReserved = new String[cnumSeats];
-		seatsReserved = new String[numSeats];
-		seatsSelected = new String[planeSize];
 		int x = 0;
 		int y = 0;
 		int buttonWidth = bounds.width / numOfRows;
@@ -233,13 +393,17 @@ public class easternPanels {
 		}catch(Exception exc) {
 		exc.printStackTrace();
 		}
+		
+	
+		
 		for(k = 0; k < fcnumOfRows; k++) {
 			
 			for(j = 0; j < fcnumOfColumns; j++) {
 				fcbuttons[k][j] = new JToggleButton(seatLetter + String.valueOf(v));
-				if(fcbuttons[k][j].getText() == seatsSelected[v])
-					fcbuttons[k][j].setBackground(new Color(0,0,0));
+				//System.out.println(fcbuttons[k][j].getText());
+					
 				fcbuttons[k][j].setBackground(new Color(128,0,128));
+				
 				
 				if(v % 4 == 0) { 
 					seatLetter++;
@@ -324,7 +488,7 @@ public class easternPanels {
 		if(i == numOfRows) {
 			easternPanel.add(Box.createRigidArea(new Dimension(6, 0)));
 		}
-		stateofButtons();
+		
 		return easternPanel;
 	}
 }
