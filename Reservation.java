@@ -11,14 +11,14 @@ import javax.swing.JOptionPane;
 
 public class Reservation {
 	public Reservation() {
-		/*fcnumReserved_ = 0;
-		cnumReserved_ = 0;
-		numReserved_ = 0;
-		fcseatsReserved_ = null;
-		cseatsReserved_ = null;
-		seatsReserved_ = null;*/
 		try {
 		myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
+		passenger = "";
+		luggage = false;
+		//confirmation = "";
+		departureTime = "00:00:00";
+		arrivalTime = "00:00:00";
+		destination = "";
 		}catch(Exception e){
 		e.printStackTrace();
 	}
@@ -28,30 +28,16 @@ public class Reservation {
 		
 		
 	}
+	
 	private String passenger;
 	private boolean luggage;
-	private String bkfastoption;
-	private String lunchoption;
-	private String dinneroption;
-	private String confirmationNum_;
+	//private String confirmation;
 	private String departureTime;
 	private String destination;
+	private String arrivalTime;
 	Connection myConn;
-	String[] fcseatsReserved_;
-	String[] cseatsReserved_;
-	String[] seatsReserved_;
-	int fcnumReserved_;
-	int cnumReserved_;
-	int numReserved_;
 	
-	/*public void setfcnumReserved(int fcnumReserved) {
-	this.fcnumReserved_ = fcnumReserved;	
-	}
-	
-	
-	public void setfcseatsReserved(String[] fcseatsReserved) {
-		this.fcseatsReserved_ = fcseatsReserved;
-	}*/
+
 	
 	public String getDestination() {
 		return destination;
@@ -69,9 +55,6 @@ public class Reservation {
 		this.departureTime = departureTime;
 	}
 
-	private String arrivalTime;
-
-	
 
 	public String getArrivalTime() {
 		return arrivalTime;
@@ -81,37 +64,13 @@ public class Reservation {
 		this.arrivalTime = arrivalTime;
 	}
 
-	public String getConfirmationNum_() {
-		return confirmationNum_;
+	/*public String getConfirmation() {
+		return confirmation;
 	}
 
-	public void setConfirmationNum_(String confirmationNum_) {
-		this.confirmationNum_ = confirmationNum_;
-	}
-
-	public String getLunchoption() {
-		return lunchoption;
-	}
-
-	public void setLunchoption(String lunchoption) {
-		this.lunchoption = lunchoption;
-	}
-
-	public String getDinneroption() {
-		return dinneroption;
-	}
-
-	public void setDinneroption(String dinneroption) {
-		this.dinneroption = dinneroption;
-	}
-
-	public String getBkfastoption() {
-		return bkfastoption;
-	}
-
-	public void setBkfastoption(String bkfastoption) {
-		this.bkfastoption = bkfastoption;
-	}
+	public void setConfirmation(String confirmation) {
+		this.confirmation = confirmation;
+	}*/
 
 	public boolean getLuggage() {
 		return luggage;
