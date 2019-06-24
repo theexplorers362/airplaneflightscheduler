@@ -6,46 +6,115 @@ import java.sql.*;
 
 public class westernPanels{
 	westernPanels(){
+		confirmation = "98765430";
 		availableDestinations = null;
 		newReservation = new Reservation();
 	}
-	Time arriveTimes[];
-	Time departureTimes[];
-	String availableDestinations[];
-	JPanel westernPanel;
-	JLabel arrivalLabel;
-	JLabel departureLabel;
-	JLabel fromtoLabel;
-	JLabel nameLabel;
-	JTextField nameField;
-	JLabel luggageLabel;
-	JRadioButton luggageButton1;
-	JRadioButton luggageButton2;
-	JComboBox destinations;
+	private String availableDestinations[];
+	private JPanel westernPanel;
+	private JLabel arrivalLabel;
+	private JLabel departureLabel;
+	private JLabel fromtoLabel;
+	private JLabel nameLabel;
+	private JTextField nameField;
+	private JLabel luggageLabel;
+	private JRadioButton luggageButton1;
+	private JRadioButton luggageButton2;
+	private JComboBox destinations;
+	private String confirmation;
+    private Reservation newReservation;
+	private ItemListener destinationListener;
+	private ItemListener departureListener;
+	private ItemListener arrivalListener;
+	private JComboBox departures;
+	private JComboBox arrivals;
 	JButton confirmButton;
-	String confirmation;
-    Reservation newReservation;
-	JComboBox arrivals;
-	JComboBox departures;
-	boolean window = false;
-	/*If a Confirmed Button is pressed then enter the fields
-	 * 
-	 * 
-	 * 
+	
+	
+	/*Generate a new confirmation number based on the numbers already generated in the JBMS*/
+	public void generateConfirmationNum() {
+		try {
+		int gener = 0;
+		int usedConfirmation = 0;
+		int usedNums = 0;
+		int generator = 98765430 + gener;
+		Statement myStat = newReservation.myConn.createStatement();
+
+		ResultSet myRs3 = myStat.executeQuery("select * from reserved");
+		
+		while(myRs3.next()) {
+			++usedConfirmation;
+		}
+		
+		
+		ResultSet myRs4 = myStat.executeQuery("select * from reserved");
+		
+		String[] usedNumbers = new String[usedConfirmation];
+		
+		while(myRs4.next()) {
+			usedNumbers[usedNums] = myRs4.getString("confirmation");
+			++usedNums;
+		}
+
+		for(int s = 0; s < usedNums; s++) {
+			if(Integer.parseInt(usedNumbers[s]) >= generator) {
+				generator++;
+				confirmation = "" + generator;
+			}
+			
+		}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	
+	}
+	
+	
+	
+	
+	/*If a Confirmed Button is pressed then enter the fields and this will tell you about a pending entry field
+	 * PASSENGER NAME
+	 * DESTINATION
+	 * DEPARTURE TIME 
+	 * ARRIVAL TIME
+	 * CONFIRMATION NUMBER
+	 * LUGGAGE OPTION
 	 */
 	public void pressConfirm() {
 		confirmButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				int  gener = 0;
-				confirmation = "9876543" + gener;
-				newReservation.setPassenger(nameField.getText());
+				if(!nameField.getText().equals(""))
+				newReservation.setPassenger(nameField.getText().toString());
+				else if(nameField.getText().equals("")) {
+					JOptionPane.showMessageDialog(null, "Please Fill in Name");
+					return;
+				}
+			
 				String query ="insert into reserved (passenger_name, destination, departureTime, arrivalTime, confirmation, luggage) values(?,?,?,?,?,?)";
 				PreparedStatement pat=newReservation.myConn.prepareStatement (query);
+					
 				pat.setString(1, newReservation.getPassenger());
+				
+				if(newReservation.getDestination() != "")
 				pat.setString(2, newReservation.getDestination());
+				else if(newReservation.getDestination() == "") {
+					JOptionPane.showMessageDialog(null, "Please Place a Destination");
+					return;
+				}
+				if(newReservation.getDepartureTime() != null)
 				pat.setString(3, newReservation.getDepartureTime());
+				else if (newReservation.getDepartureTime() == null) {
+					JOptionPane.showMessageDialog(null, "Please Schedule a Departure Time");
+					return;
+				}
+				
+				if(newReservation.getArrivalTime() != null)
 				pat.setString(4, newReservation.getArrivalTime());
+				else if (newReservation.getArrivalTime() == null) {
+					JOptionPane.showMessageDialog(null, "Please Schedule a Arrival Time");
+					return;
+				}
 				pat.setString(5, confirmation);
 				pat.setBoolean(6,newReservation.getLuggage());
 				pat.execute();
@@ -53,8 +122,7 @@ public class westernPanels{
 				JOptionPane.showMessageDialog(null, "Data Saved");
 				
 				pat.close();
-				
-				//confirmationNumber
+			
 				
 				
 			}catch(Exception e){
@@ -65,42 +133,90 @@ public class westernPanels{
 	});
 	}
 	
-	/*If a comboBox is pressed then we get the specific destinations available and ongoing flight on our JBMS server
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
 	
-	public void addActionListenerHelperComboGO(JComboBox GO) {
-		GO.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+	
+	
+	/*Enable a listener on the departures menu that picks the referenced arrival time for that flight*/
+	public void addItemListenerHelperComboGO() {
+		departures.addItemListener(departureListener = new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
 			JComboBox cb = (JComboBox) arg0.getSource();
-			
+			if(arg0.getStateChange() == ItemEvent.SELECTED) {
+				
 			newReservation.setDepartureTime(cb.getSelectedItem().toString());
-            }
+		    
+            try {
+            	Statement myStat = newReservation.myConn.createStatement();
+            
+          		ResultSet myRs1 = myStat.executeQuery("SELECT helloTime FROM airplane WHERE goTime = \'" + cb.getSelectedItem().toString() + "\';");
+            	
+            	while(myRs1.next()) {
+            		newReservation.setArrivalTime(((myRs1.getTime("helloTime"))).toString()); //See if this works
+            	}
+            	arrivals.setSelectedIndex(cb.getSelectedIndex());
+        		westernPanel.revalidate();
+            	westernPanel.repaint();
+            	
+            }catch(Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+            }    
 		});
 	}
 	
-	public void addActionListenerHelperComboHELLO(JComboBox HELLO) {
-		arrivals.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			JComboBox cb = (JComboBox) arg0.getSource();
-			// Print the selected items and the action command.
-            
-           
-            newReservation.setArrivalTime(cb.getSelectedItem().toString());
-			}	
+	/*Disable item listener after the we refresh the click on destinations*/
+	public void disableListenerHelperComboGO() {
+		departures.removeItemListener(departureListener);
+	}
+	
+	/*Enable a listener on the arrivals menu that picks the referenced departure time for that flight*/
+	public void addItemListenerHelperComboHELLO() {
+		arrivals.addItemListener(arrivalListener = new ItemListener() {
+			public void itemStateChanged (ItemEvent arg0) {
+				JComboBox cb = (JComboBox) arg0.getSource();
+				if(arg0.getStateChange() == ItemEvent.SELECTED) {
+				newReservation.setArrivalTime(cb.getSelectedItem().toString());
+				
+	            try {
+	            	Statement myStat = newReservation.myConn.createStatement();   	
+	            	
+	    			
+	    			ResultSet myRs1 = myStat.executeQuery("SELECT goTime FROM airplane WHERE helloTime = \'" + cb.getSelectedItem().toString() + "\';");
+	            	 
+	            	
+	            	while(myRs1.next()) {
+	            		newReservation.setDepartureTime((myRs1.getTime("goTime")).toString()); //See if this works
+	            	}
+	               	departures.setSelectedIndex(cb.getSelectedIndex());
+	                
+            		westernPanel.revalidate();
+	            	westernPanel.repaint();
+	            	
+	            	
+	            }catch(Exception exc) {
+						exc.printStackTrace();
+					}
+				}
+				   
+			}
             });
 	}
 	
-	public void addActionListenerHelperComboBennie() {
-		destinations.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+	
+	/*Disable item listener after the we refresh the click on destinations*/
+	public void disableListenerHelperComboHELLO() {
+		arrivals.removeItemListener(arrivalListener);
+	}
+	
+	
+	/*Item Listener for Destinations box and will display departure/arrival/confirmation button on interaction*/
+	public void addItemListenerHelperComboBennie() {
+		destinations.addItemListener(destinationListener = new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
 			JComboBox cb = (JComboBox) arg0.getSource();
+			if(arg0.getStateChange() == ItemEvent.SELECTED) {
 			int pickedOperations = 0;
-            // Print the selected items and the action command.
             
             try {
             	Statement myStat = newReservation.myConn.createStatement();
@@ -115,101 +231,146 @@ public class westernPanels{
             	Time arriveTimes[] = new Time[pickedOperations];
             	Time departureTimes[] = new Time[pickedOperations];	
     			
-    			//System.out.println("SELECT destination, goTime, helloTime FROM airplane WHERE destination = \'" + cb.getSelectedItem().toString() + "\';");
-            	ResultSet myRs1 = myStat.executeQuery("SELECT destination, goTime, helloTime FROM airplane WHERE destination = \'" + cb.getSelectedItem().toString() + "\';");
+    			ResultSet myRs1 = myStat.executeQuery("SELECT destination, goTime, helloTime FROM airplane WHERE destination = \'" + cb.getSelectedItem().toString() + "\';");
             	
-            	pickedOperations = 0;
+            	int operations = 0;
+            		 
             	
             	while(myRs1.next()) {
-            		//availableDestinations[pickedOperations] = myRs1.getString("destination");
-            		arriveTimes[pickedOperations] = myRs1.getTime("goTime");
-            		//System.out.println(myRs1.getTime("goTime"));
-            		departureTimes[pickedOperations] = myRs1.getTime("helloTime");
-            		//System.out.println(myRs1.getTime("helloTime"));
-            		++pickedOperations;
+            		departureTimes[operations] = myRs1.getTime("goTime");
+            		arriveTimes[operations] = myRs1.getTime("helloTime");
+            		++operations;
             	}
             	departures = new JComboBox(departureTimes);
             	arrivals = new JComboBox(arriveTimes);
+            	departures.setFont(new Font("Arial", Font.PLAIN, 11));
+            	arrivals.setFont(new Font("Arial", Font.PLAIN, 11));
             	
-                westernPanel.add(departures); //Still figuring out how to change the times
-                westernPanel.add(arrivals);
-                addActionListenerHelperComboGO(departures);
-                addActionListenerHelperComboHELLO(arrivals);
-               /*  departures.revalidate();
-            	departures.repaint();
-            	arrivals.revalidate();
-            	arrivals.repaint();*/
-    			westernPanel.revalidate();
-            	westernPanel.repaint();
-            }
+            	
+            	disableListenerHelperComboBennie();
+            	
+            	
             
-            /*String command = cb.getActionCommand();
-            System.out.println("Action Command = " + command);
-
-            // Detect whether the action command is "comboBoxEdited"
-            // or "comboBoxChanged"
-            if ("comboBoxEdited".equals(command)) {
-                System.out.println("User has typed a string in " +
-                        "the combo box.");
-            } else if ("comboBoxChanged".equals(command)) {
-                System.out.println("User has selected an item " +
-                        "from the combo box.");
-            }*/
-			/*	try {
-					newReservation.setArrivalTime(any.getSelectedItem().toString());
-					//JOptionPane.showMessageDialog(null, "Data Saved");
-				}*/
-				catch(Exception exc) {
+            }catch(Exception exc) {
 					exc.printStackTrace();
 				}
-					
-					
-				
-            
+			}
             }
 		});
 	}
-/* Controls looking in JBMS for airplane operation of ongoing flights
- * 
- * 
- * 
- * 
- */
+	
+	
+	/* Controls looking in JBMS for airplane operation of ongoing flights*/
 	public void grabMetheOperations() {
 		try {
-			int operations = 0;
+			int pickedOperations = 0;
 			Statement myStat = newReservation.myConn.createStatement();
 
 			ResultSet myRs = myStat.executeQuery("select * from airplane");
 			
 			while(myRs.next()) {
-				++operations;
+				++pickedOperations;
 			}
 			
 
-			availableDestinations = new String[operations];
+			availableDestinations = new String[pickedOperations];
 			
 			ResultSet myRs1 = myStat.executeQuery("select * from airplane");
 			
-			operations = 0;
+			int operations = 0;
 			
 			while(myRs1.next()) {
 				availableDestinations[operations] = myRs1.getString("destination");
 				++operations;
 			}
 			destinations = new JComboBox(availableDestinations);
-				
+			destinations.setFont(new Font("Arial", Font.PLAIN, 11));
+        	destinations.setSelectedIndex(-1);
 			}catch(Exception exc) {
 			exc.printStackTrace();
 			}
 
 	}
-	/*Controls finding Yes? or No? for luggage
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+	
+	
+	/*Stop displaying Departures/Arrivals/Confirm buttons after first interaction*/
+	public void disableListenerHelperComboBennie() {
+		westernPanel.add(Box.createRigidArea(new Dimension(23, 0)));
+		westernPanel.add(departureLabel);
+		westernPanel.add(departures);
+		westernPanel.add(Box.createRigidArea(new Dimension(35, 0)));
+		westernPanel.add(arrivalLabel);
+        westernPanel.add(arrivals);
+        westernPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        westernPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        westernPanel.add(confirmButton);
+        
+    	departures.setSelectedIndex(-1);
+    	arrivals.setSelectedIndex(-1);
+    	westernPanel.revalidate();
+    	westernPanel.repaint();
+    	addItemListenerHelperComboGO();
+    	addItemListenerHelperComboHELLO();
+		destinations.removeItemListener(destinationListener);
+			destinations.addItemListener(destinationListener = new ItemListener() {
+				public void itemStateChanged(ItemEvent arg0) {
+				JComboBox cb = (JComboBox) arg0.getSource();
+				if(arg0.getStateChange() == ItemEvent.SELECTED) {
+					
+				disableListenerHelperComboGO();
+				disableListenerHelperComboHELLO();
+				
+				int pickedOperations = 0;
+	            
+	            try {
+	            	Statement myStat = newReservation.myConn.createStatement();
+	            	newReservation.setDestination(cb.getSelectedItem().toString());
+	            	ResultSet myRs = myStat.executeQuery("SELECT destination FROM airplane WHERE destination = \'" + cb.getSelectedItem().toString() + "\';" );
+	            
+	            	while(myRs.next()) {
+	            		++pickedOperations;
+	            	}	
+	            	
+	            	Time[] arriveTimes = new Time[pickedOperations];
+	            	Time[] departureTimes = new Time[pickedOperations];	
+	    			
+	    	    	ResultSet myRs1 = myStat.executeQuery("SELECT destination, goTime, helloTime FROM airplane WHERE destination = \'" + cb.getSelectedItem().toString() + "\';");
+	            	
+	            	
+	            	int operations = 0;
+	            	while(myRs1.next()) {
+	            		departureTimes[operations] = myRs1.getTime("goTime");
+	            		arriveTimes[operations] = myRs1.getTime("helloTime");
+	            		++operations;
+	            	}
+	            	departures.removeAllItems();
+	            	arrivals.removeAllItems();
+	            	westernPanel.revalidate();
+	            	westernPanel.repaint();
+	            	departures.setModel(new DefaultComboBoxModel(departureTimes));
+	            	arrivals.setModel(new DefaultComboBoxModel(arriveTimes));
+	            	departures.setSelectedIndex(-1);
+	            	arrivals.setSelectedIndex(-1);
+	            	westernPanel.revalidate();
+	            	westernPanel.repaint();
+	        		
+	            	addItemListenerHelperComboGO();
+	            	addItemListenerHelperComboHELLO();
+	      
+	    		}catch(Exception exc) {
+						exc.printStackTrace();
+					}
+				}
+				
+						
+					
+	            
+	            }
+			});
+		}
+	
+	
+	/*Toggles controls finding Yes? or No? for luggage*/
 	public void togglethemButtons() {
 		luggageButton1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -238,27 +399,35 @@ public class westernPanels{
 		});
 	}
 	
-	/*Boundary Component of class westernPanels
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+	
+/*Boundary Component of class westernPanels */
 public Component getTextArea() {
 	newReservation = new Reservation();
 	westernPanel = new JPanel();
+	
 	westernPanel.setLayout(new FlowLayout());
 	nameLabel = new JLabel("Name: ");
+	nameLabel.setFont(new Font("Arial", Font.PLAIN, 11));
 	departureLabel = new JLabel("Departure: ");
+	departureLabel.setFont(new Font("Arial", Font.PLAIN, 11));
 	arrivalLabel = new JLabel("Arrival: ");
+	arrivalLabel.setFont(new Font("Arial", Font.PLAIN, 11));
 	fromtoLabel = new JLabel("LAX -> ");
-	nameField = new JTextField(20);
+	fromtoLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+	nameField = new JTextField("", 31);
+	nameField.setFont(new Font("Arial", Font.PLAIN, 11));
 	luggageLabel = new JLabel("Luggage?: ");
+	luggageLabel.setFont(new Font("Arial", Font.PLAIN, 11));
 	luggageButton1 = new JRadioButton("Yes");
+	luggageButton1.setFont(new Font("Arial", Font.PLAIN, 11));
 	luggageButton2 = new JRadioButton("No");
+	luggageButton2.setFont(new Font("Arial", Font.PLAIN, 11));
 	confirmButton = new JButton("Confirm");
+	confirmButton.setFont(new Font("Arial", Font.PLAIN, 11));
+	
 	grabMetheOperations();
+	
+	
 	westernPanel.add(Box.createRigidArea(new Dimension(25, 0)));
 	westernPanel.add(nameLabel);
 	westernPanel.add(nameField);
@@ -271,13 +440,8 @@ public Component getTextArea() {
 	westernPanel.add(luggageButton2);
 	westernPanel.add(Box.createRigidArea(new Dimension(20, 0)));
 	westernPanel.add(fromtoLabel);
-	westernPanel.add(destinations);
+	westernPanel.add(destinations); 
 	westernPanel.add(Box.createRigidArea(new Dimension(800, 0)));
-	/*westernPanel.add(departureLabel);
-	westernPanel.add(departures);
-	westernPanel.add(arrivalLabel);
-	westernPanel.add(arrivals);*/ 
-	westernPanel.add(confirmButton);
 	
 	return westernPanel;
 }
