@@ -2,10 +2,14 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+import javax.xml.soap.Text;
 
 import com.mysql.cj.util.StringUtils;
 
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class easternPanels {
 	public easternPanels(){
@@ -32,7 +36,13 @@ public class easternPanels {
 		numOfColumns = 6;
 		planeSize = 186;
 		numPlans = 0;
-		confirmationNum = ""; 
+		confirmationNum = "98765430"; 
+		fcbuttons = new JToggleButton[fcnumOfRows][fcnumOfColumns];
+		cbuttons = new JToggleButton[cnumOfRows][cnumOfColumns];
+		buttons = new JToggleButton[numOfRows][numOfColumns];
+		fclistener= new ItemListener[fcnumOfRows][fcnumOfColumns];
+		clistener= new ItemListener[cnumOfRows][cnumOfColumns];
+		listener = new ItemListener[numOfRows][numOfColumns];
 		newReservation = new Reservation();
 		bkmealsSelected = new String[planeSize];
 		lunchmealsSelected = new String[planeSize];
@@ -42,72 +52,83 @@ public class easternPanels {
 		seatsReserved = new String[numSeats];
 		seatsSelected = new String[planeSize];
 		}
-	JPanel easternPanel;
-	int k,j;
-	int h,z;
-	int i,f;
-	int index;
-	int v;
-	int fcnumSeats;
-	int cnumSeats;
-	int numSeats;
-	String[] fcseatsReserved;
-	String[] cseatsReserved;
-	String[] seatsReserved;
-	int fcnumReserved;
-	int cnumReserved;
-	int numReserved;
+	private JPanel easternPanel;
+	private int k,j;
+	private int h,z;
+	private int i,f;
+	private int index;
+	private int v;
+	private int fcnumSeats;
+	private int cnumSeats;
+	private int numSeats;
+	private String[] fcseatsReserved;
+	private String[] cseatsReserved;
+	private String[] seatsReserved;
+	private int fcnumReserved;
+	private int cnumReserved;
+	private int numReserved;
 	
-	int totalReserved;
-	String[] seatsSelected;
+	private int totalReserved;
+	private String[] seatsSelected;
 	
-	String[] bkmealsSelected;
-	String[] lunchmealsSelected;
-	String[] dinnermealsSelected;
+	private String[] bkmealsSelected;
+	private String[] lunchmealsSelected;
+	private String[] dinnermealsSelected;
 	Reservation newReservation;
-	JButton seatButton;
+	private JButton seatButton;
+	private int fcnumOfRows;
+	private int fcnumOfColumns;
+	private int cnumOfRows;
+	private int cnumOfColumns;
+	private int numOfRows;
+	private int numOfColumns;
+	private int planeSize;
+	private String confirmationNum;
+	private JToggleButton[][] fcbuttons;
+	private JToggleButton[][] cbuttons;
+	private JToggleButton[][] buttons;
 	
-	int fcnumOfRows;
-	int fcnumOfColumns;
-	int cnumOfRows;
-	int cnumOfColumns;
-	int numOfRows;
-	int numOfColumns;
-	int planeSize;
+	private ItemListener[][] fclistener;
+	private ItemListener[][] clistener;
+	private ItemListener[][] listener;
+	private JRadioButton a;
+	private JRadioButton b;
+	private JRadioButton c;
 	
-	String confirmationNum;
-	JToggleButton[][] fcbuttons;
-	JToggleButton[][] cbuttons;
-	JToggleButton[][] buttons;
-	JRadioButton a;
-	JRadioButton b;
-	JRadioButton c;
+	private ButtonGroup a_;
+	private ButtonGroup b_;
+	private ButtonGroup c_;
+	private int numPlans;
 	
-	ButtonGroup a_;
-	ButtonGroup b_;
-	ButtonGroup c_;
-	seat[] passengerPlan;
-	int numPlans;
-	/*Makes the state of the toggle button enabled if pressed for the returned seat numbers in an array with the size
-	 * toggles between color for premium seat color and grey to signify the need to be confirmed for reservation
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+	
+	
+	 public void getTimeSpans() //Still working on popping off
+	 {
+	     boolean firstTime = false, secondTime = false;
+	     DateFormat format = new SimpleDateFormat("HH:mm:ss");
+	     System.out.println(newReservation.getDepartureTime());
+			Date time1 = null;
+			Date time2 = null;
+			System.out.println(time1);
+	    /* if(newReservation.getDepartureTime() > "20:11:13" && newReservation.getArrivalTime() < "14:49:00")
+	     {
+	        firstTime = true;
+	     }
+
+	     if(time2 > "20:11:13" && time2 < "14:49:00")
+	     {
+	        secondTime = true;
+	     }*/
+	  }
+	 
 	public void addActionListenerHelperbkButtons(JRadioButton any, ButtonGroup group) {
 		a_ = group;
 	any.addActionListener(new ActionListener() { 
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				boolean  open = false;
-				if(open == false) {
 				a = (JRadioButton) arg0.getSource();
 			
-				bkmealsSelected[numPlans] = a.getText();
-				//a.setBackground(new Color(54,81,94));
-				open = true;
-				}
+				bkmealsSelected[numPlans] = a.getName();
 				
 			}catch(Exception e){
 				e.printStackTrace();
@@ -122,14 +143,10 @@ public class easternPanels {
 		any.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					boolean  open = false;
-					if(open == false) {
 					b = (JRadioButton) arg0.getSource();
 					
-					lunchmealsSelected[numPlans] = b.getText();
-					//b.setBackground(new Color(54,81,94));
-					open = true;
-					}
+					lunchmealsSelected[numPlans] = b.getName();
+					
 					
 				}catch(Exception e){
 					e.printStackTrace();
@@ -144,15 +161,9 @@ public class easternPanels {
 		any.addActionListener(new ActionListener() { 
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					boolean  open = false;
-					if(open == false) {
 					c = (JRadioButton) arg0.getSource();
 					
-					dinnermealsSelected[numPlans] = c.getText();
-					
-					//c.setBackground(new Color(54,81,94));
-					open = true;
-					}
+					dinnermealsSelected[numPlans] = c.getName();
 				}catch(Exception e){
 					e.printStackTrace();
 				}
@@ -160,11 +171,17 @@ public class easternPanels {
 			}
 	});
 	}
+	
+	
+	/*Makes the state of the toggle button enabled if pressed for the returned seat numbers in an array with the size
+	 * toggles between color for premium seat color and grey to signify the need to be confirmed for reservation
+	 * will show black if the seat has been claimed already
+	 */
 	public void stateofButtons() {
 		for(k = 0; k < fcnumOfRows; k++) {
 			for(j = 0; j < fcnumOfColumns; j++) {
 				
-		fcbuttons[k][j].addItemListener(new ItemListener() {
+		fcbuttons[k][j].addItemListener(fclistener[k][j] = new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				
 						JToggleButton tb = (JToggleButton) arg0.getItem();
@@ -173,14 +190,13 @@ public class easternPanels {
 						numPlans++;
 						fcnumReserved++;
 						totalReserved++;
-						/*a.setBackground(null); 
+						a.setBackground(null); 
 						b.setBackground(null);
-						c.setBackground(null);*/
+						c.setBackground(null);
 						a_.clearSelection();
 						b_.clearSelection();
 						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
-						//JOptionPane.showMessageDialog(null, "Data Saved");*/
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
 							numPlans--;
@@ -190,11 +206,10 @@ public class easternPanels {
 							bkmealsSelected[numPlans] = "";
 							lunchmealsSelected[numPlans] = "";
 							dinnermealsSelected[numPlans] = "";
-							tb.setBackground(new Color(128,0,128));
+							tb.setBackground(new Color(147,112,219));
 						}
 						
 					
-					//JOptionPane.showMessageDialog(null, "Data Saved");
 			}
 			
 		});
@@ -204,24 +219,22 @@ public class easternPanels {
 		for(h = 0; h < cnumOfRows; h++) {
 			for(z = 0; z < cnumOfColumns; z++) {
 		
-		cbuttons[h][z].addItemListener(new ItemListener() {
+		cbuttons[h][z].addItemListener(clistener[h][z] = new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				try {
 						JToggleButton tb = (JToggleButton) arg0.getItem();
 						if(arg0.getStateChange() == ItemEvent.SELECTED) {
-						//System.out.println(tb.getText());
 						cseatsReserved[cnumReserved] = tb.getText();
 						numPlans++;
 						cnumReserved++;
 						totalReserved++;
-						/*a.setBackground(null); 
+						a.setBackground(null); 
 						b.setBackground(null);
-						c.setBackground(null);*/
+						c.setBackground(null);
 						a_.clearSelection();
 						b_.clearSelection();
 						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
-						//JOptionPane.showMessageDialog(null, "Data Saved");
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
 							numPlans--;
@@ -234,8 +247,6 @@ public class easternPanels {
 							tb.setBackground(new Color(255,215,0));
 						}
 
-					//JOptionPane.showMessageDialog(null, "Data Saved");
-					
 					
 				}catch(Exception e){
 					e.printStackTrace();
@@ -250,14 +261,13 @@ public class easternPanels {
 		for(i = 0; i < numOfRows; i++) {
 			for(f = 0; f < numOfColumns; f++) {
 		
-		buttons[i][f].addItemListener(new ItemListener() {
+		buttons[i][f].addItemListener(listener[i][f] = new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				try {
 						JToggleButton tb = (JToggleButton) arg0.getItem();
 					
 						if(arg0.getStateChange() == ItemEvent.SELECTED) {
 						seatsReserved[numReserved] = tb.getText();
-						//System.out.println(tb.getText());
 						numPlans++;
 						numReserved++;
 						totalReserved++;
@@ -268,7 +278,6 @@ public class easternPanels {
 						b_.clearSelection();
 						c_.clearSelection();
 						tb.setBackground(new Color(192,192,192));
-						//JOptionPane.showMessageDialog(null, "Data Saved");
 						}
 						else if(arg0.getStateChange() == ItemEvent.DESELECTED) {
 							numPlans--;
@@ -280,10 +289,7 @@ public class easternPanels {
 							dinnermealsSelected[numPlans] = "";
 							tb.setBackground(new Color(205,127,50));
 						}
-						
-						
-					//JOptionPane.showMessageDialog(null, "Data Saved");
-					
+									
 					
 				}catch(Exception e){
 					e.printStackTrace();
@@ -295,11 +301,57 @@ public class easternPanels {
 		} 
 	}
 	
+	
+	/*Generate a new confirmation number based on the numbers already generated in the JBMS*/
+	public void generateConfirmationNum() {
+		try {
+		int gener = 0;
+		int usedConfirmation = 0;
+		int usedNums = 0;
+		int generator = 98765430 + gener;
+		Statement myStat = newReservation.myConn.createStatement();
+
+		ResultSet myRs3 = myStat.executeQuery("select * from reserved");
+		
+		while(myRs3.next()) {
+			++usedConfirmation;
+		}
+		
+		
+		ResultSet myRs4 = myStat.executeQuery("select * from reserved");
+		
+		String[] usedNumbered = new String[usedConfirmation];
+		
+		while(myRs4.next()) {
+			usedNumbered[usedNums] = myRs4.getString("confirmation");
+			++usedNums;
+		}
+
+		for(int s = 0; s < usedNums; s++) {
+			if(Integer.parseInt(usedNumbered[s]) >= generator) {
+				generator++;
+				confirmationNum = "" + generator;
+			}
+			
+		}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	
+	}
+	
+	
+	/*If a Confirmed Button is pressed then enter the fields and this will tell you about a pending entry field
+	 * SEATS DESIRED
+	 * BKFAST
+	 * LUNCH
+	 * DINNER
+	 * CONFIRMATION NUMBER
+	 */
 	public void pressConfirm(JButton any) {
 		any.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				int  gener = 0;
 				String query2 ="insert into confirmedseats (seats, bkmealplan, lunchmealplan, dinnermealplan, confirmationNum) values(?,?,?,?,?)";
 				PreparedStatement pat2=newReservation.myConn.prepareStatement (query2);
 				for(int seatIter = 0; seatIter < fcnumReserved; seatIter++) {
@@ -308,7 +360,6 @@ public class easternPanels {
 					pat2.setString(3, lunchmealsSelected[seatIter]);
 					pat2.setString(4, dinnermealsSelected[seatIter]);
 					
-					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
 					pat2.setString(5, confirmationNum);
 					pat2.execute();
 				} 
@@ -318,7 +369,6 @@ public class easternPanels {
 					pat2.setString(3, lunchmealsSelected[seatIter]);
 					pat2.setString(4, dinnermealsSelected[seatIter]);
 					
-					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
 					pat2.setString(5, confirmationNum);
 					pat2.execute();
 				}
@@ -328,18 +378,11 @@ public class easternPanels {
 					pat2.setString(3, lunchmealsSelected[seatIter]);
 					pat2.setString(4, dinnermealsSelected[seatIter]);
 					
-					confirmationNum = "9876543" + gener; // still needs to be changed to more viable confirmation option
 					pat2.setString(5, confirmationNum);
 					pat2.execute();
 				}
-				
-				
-				//JOptionPane.showMessageDialog(null, "Data Saved");
-				
-				pat2.close();
-				
-				//confirmationNumber
-				
+					
+				pat2.close();	
 				
 			}catch(Exception e){
 				e.printStackTrace();
@@ -349,24 +392,92 @@ public class easternPanels {
 	});
 	}
 	
-	public void seeiftaken(JToggleButton tglb) {
-		int q = 0;
-		while(q < index) {
-			System.out.println("\"" + tglb.getText()+ "\"");
-		if(tglb.getText() == seatsSelected[q]) {
-			System.out.println("\"" + seatsSelected[q] + "\"");
-			tglb.setBackground(new Color(0,0,0));
+	/*Makes buttons black and responsive with GUI because the seat has already been claimed */
+	
+	public void seeiftaken() {
+		String taken = "";
+		for(int lmao = 0; lmao < index; lmao++) {
+			taken = seatsSelected[lmao];
+		
+	for(int k_ = 0; k_ < fcnumOfRows; k_++) {
+			
+			for(int j_ = 0; j_ < fcnumOfColumns; j_++) {
+				if(fcbuttons[k_][j_].getText().equals(taken)) {
+					fcbuttons[k_][j_].setBackground(new Color(0,0,0));
+					fcbuttons[k_][j_].removeItemListener(fclistener[k_][j_]);
+					
+					fcbuttons[k_][j_].addItemListener(fclistener[k_][j_] = new ItemListener() {
+						public void itemStateChanged(ItemEvent arg0) {
+							
+									JToggleButton tb = (JToggleButton) arg0.getItem();
+									if(arg0.getStateChange() == ItemEvent.SELECTED) {
+									
+									JOptionPane.showMessageDialog(null, "This seat is reserved! Please pick another seat!");
+									}
+						}
+						
+					});
+				}
+			
+			}
+	
+	}
+		
+		
+		for(int h_ = 0; h_ < cnumOfRows; h_++) {
+			
+			for(int z_ = 0; z_ < cnumOfColumns; z_++) {
+				if(cbuttons[h_][z_].getText().equals(taken)) {
+					cbuttons[h_][z_].setBackground(new Color(0,0,0));
+					cbuttons[h_][z_].removeItemListener(clistener[h_][z_]);
+					
+					cbuttons[h_][z_].addItemListener(clistener[h_][z_] = new ItemListener() {
+						public void itemStateChanged(ItemEvent arg0) {
+							
+									JToggleButton tb = (JToggleButton) arg0.getItem();
+									if(arg0.getStateChange() == ItemEvent.SELECTED) {
+									
+									JOptionPane.showMessageDialog(null, "This seat is reserved! Please pick another seat!");
+									}
+						}
+						
+					});
+				}
+			
+			}
+		
 		}
 		
-		q++;
+		
+		for(int i_ = 0; i_ < numOfRows; i_++) {
+			
+			for(int f_ = 0; f_ < numOfColumns; f_++) {
+				
+				if(buttons[i_][f_].getText().equals(taken)) {
+					buttons[i_][f_].setBackground(new Color(0,0,0));
+					buttons[i_][f_].removeItemListener(listener[i_][f_]);
+					
+					buttons[i_][f_].addItemListener(listener[i_][f_] = new ItemListener() {
+						public void itemStateChanged(ItemEvent arg0) {
+							
+									JToggleButton tb = (JToggleButton) arg0.getItem();
+									if(arg0.getStateChange() == ItemEvent.SELECTED) {
+									
+									JOptionPane.showMessageDialog(null, "This seat is reserved! Please pick another seat!");
+									}
+						}
+						
+					});
+				}
+				
+			}
+			
 		}
+		}
+		
 	}
 	/*Boundary Component of class easternPanels
-	 *When reopened the mySQL JBMS will color in the selectedSeating from previous requests blacked out and non-responsive.
-	 * 
-	 * 
-	 * 
-	 * 
+	 *When reopened the mySQL JBMS will color in the selectedSeating from previous requests blacked out and responsive with "SEAT RESERVED" GUI
 	 */
 
 	public Component getButtonArea() {
@@ -377,9 +488,6 @@ public class easternPanels {
 		int buttonWidth = bounds.width / numOfRows;
 		int buttonHeight = bounds.height / numOfColumns;
 		char seatLetter = 'A';
-		fcbuttons = new JToggleButton[fcnumOfRows][fcnumOfColumns];
-		cbuttons = new JToggleButton[cnumOfRows][cnumOfColumns];
-		buttons = new JToggleButton[numOfRows][numOfColumns];
 		try {
 		
 		Statement myStat = newReservation.myConn.createStatement();
@@ -395,17 +503,14 @@ public class easternPanels {
 		}
 		
 	
-		
 		for(k = 0; k < fcnumOfRows; k++) {
 			
 			for(j = 0; j < fcnumOfColumns; j++) {
-				fcbuttons[k][j] = new JToggleButton(seatLetter + String.valueOf(v));
-				//System.out.println(fcbuttons[k][j].getText());
-					
-				fcbuttons[k][j].setBackground(new Color(128,0,128));
+				fcbuttons[k][j] = new JToggleButton((seatLetter + String.valueOf(v)).toString());
 				
+				fcbuttons[k][j].setBackground(new Color(147,112,219));
 				
-				if(v % 4 == 0) { 
+				if(v % 4 == 0 && v != 0) { 
 					seatLetter++;
 				}
 				fcbuttons[k][j].setFont(new Font("Arial", Font.PLAIN, 5));
@@ -430,14 +535,11 @@ public class easternPanels {
 		for(h = 0; h < cnumOfRows; h++) {
 			
 			for(z = 0; z < cnumOfColumns; z++) {
-				cbuttons[h][z] = new JToggleButton(seatLetter + String.valueOf(v));
-				
-				if(cbuttons[h][z].getText() == seatsSelected[v])
-					cbuttons[h][z].setBackground(new Color(0,0,0));
+				cbuttons[h][z] = new JToggleButton((seatLetter + String.valueOf(v)).toString());
+			
 				cbuttons[h][z].setBackground(new Color(255,215,0));
 				if(v % 6 == 0) { 
 					seatLetter++;
-					//System.out.println(seatLetter);
 				}
 				cbuttons[h][z].setFont(new Font("Arial", Font.PLAIN, 5));
 				cbuttons[h][z].setPreferredSize(new Dimension(11,10));
@@ -461,14 +563,11 @@ public class easternPanels {
 		for(i = 0; i < numOfRows; i++) {
 			
 			for(f = 0; f < numOfColumns; f++) {
-				buttons[i][f] = new JToggleButton(seatLetter + String.valueOf(v));
-
-				if(buttons[i][f].getText() == seatsSelected[v])
-					buttons[i][f].setBackground(new Color(0,0,0));
+				buttons[i][f] = new JToggleButton((seatLetter + String.valueOf(v)).toString());
+		
 				buttons[i][f].setBackground(new Color(205,127,50));
 				if(v % 6 == 0) { 
 				seatLetter++;
-				//System.out.println(seatLetter);
 				}
 				buttons[i][f].setFont(new Font("Arial", Font.PLAIN, 5));
 				buttons[i][f].setPreferredSize(new Dimension(10,10));
