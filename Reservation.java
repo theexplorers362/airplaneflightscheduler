@@ -1,13 +1,10 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class Reservation {
 	public Reservation() {
@@ -15,7 +12,7 @@ public class Reservation {
 		myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/booked_flights","root","student");
 		passenger = "";
 		luggage = false;
-		//confirmation = "";
+		confirmation = "";
 		departureTime = "00:00:00";
 		arrivalTime = "00:00:00";
 		destination = "";
@@ -31,7 +28,7 @@ public class Reservation {
 	
 	private String passenger;
 	private boolean luggage;
-	//private String confirmation;
+	private String confirmation;
 	private String departureTime;
 	private String destination;
 	private String arrivalTime;
@@ -64,13 +61,13 @@ public class Reservation {
 		this.arrivalTime = arrivalTime;
 	}
 
-	/*public String getConfirmation() {
+	public String getConfirmation() {
 		return confirmation;
 	}
 
 	public void setConfirmation(String confirmation) {
 		this.confirmation = confirmation;
-	}*/
+	}
 
 	public boolean getLuggage() {
 		return luggage;
