@@ -330,10 +330,10 @@ public class easternPanels {
 		for(int s = 0; s < usedNums; s++) {
 			if(Integer.parseInt(usedNumbered[s]) >= generator) {
 				generator++;
-				confirmationNum = "" + generator;
 			}
 			
 		}
+		confirmationNum = "" + generator;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
