@@ -59,10 +59,10 @@ public class westernPanels{
 		for(int s = 0; s < usedNums; s++) {
 			if(Integer.parseInt(usedNumbers[s]) >= generator) {
 				generator++;
-				confirmation = "" + generator;
 			}
 			
 		}
+		confirmation = "" + generator;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
